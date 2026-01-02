@@ -8,6 +8,10 @@ import {
 } from "../assets/assets";
 import SoftBackdrop from "../components/SoftBackdrop";
 import AspectRatioSelector from "../components/AspectRatioSelector";
+import StyleSelector from "../components/StyleSelector";
+import ColorSchemeSelector from "../components/ColorSchemeSelector";
+import { motion } from "framer-motion";
+import PreviewPanel from "../components/PreviewPanel";
 
 export const Generate = () => {
   const { id } = useParams();
@@ -25,7 +29,12 @@ export const Generate = () => {
   return (
     <>
       <SoftBackdrop />
-      <div className="pt-24 min-h-screen">
+      <motion.div
+        className="pt-24 min-h-screen"
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
         <main className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 pb-28 lg:pb-8">
           <div className="grid lg:grid-cols-[400px_1fr] gap-8">
             {/* Left panel */}
@@ -65,7 +74,17 @@ export const Generate = () => {
                     onChange={setAspectRatio}
                   />
                   {/* style selector */}
+                  <StyleSelector
+                    isOpen={styleDropdownOpen}
+                    setIsOpen={setStyleDropdownOpen}
+                    value={style}
+                    onChange={setStyle}
+                  />
                   {/* color schema selector */}
+                  <ColorSchemeSelector
+                    value={colorSchemeId}
+                    onChange={setColorSchemeId}
+                  />
                   {/* additional details */}
                   <div className="space-y-2">
                     <label className="block text-sm font-medium">
@@ -90,10 +109,21 @@ export const Generate = () => {
               </div>
             </div>
             {/* Right panel */}
-            <div></div>
+            <div>
+              <div className="p-6 rounded-2xl bg-white/8 border border-white/10 shadow-xl">
+                <h2 className="text-lg font-semibold mb-4 text-zinc-100">
+                  Preview
+                </h2>
+                <PreviewPanel
+                  thumbnail={thumbnail}
+                  isLoading={loading}
+                  aspect={aspectRatio}
+                />
+              </div>
+            </div>
           </div>
         </main>
-      </div>
+      </motion.div>
     </>
   );
 };
