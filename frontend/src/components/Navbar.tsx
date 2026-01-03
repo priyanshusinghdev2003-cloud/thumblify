@@ -40,7 +40,7 @@ export default function Navbar() {
           ))}
           <NavLink
             key={"contact"}
-            to={"#contact"}
+            to={"/#contact"}
             className="hover:text-pink-500 transition"
           >
             Contact
