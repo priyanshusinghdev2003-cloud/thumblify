@@ -1,4 +1,4 @@
-import { Schema, model, Document, models } from "mongoose";
+import mongoose, { Schema, model, Document } from "mongoose";
 
 export type SubscriptionTier = "basic" | "pro" | "enterprise";
 
@@ -42,6 +42,6 @@ UserSchema.methods.getRequestLimit = function (): number {
   return TIER_LIMITS[this.tier as SubscriptionTier];
 };
 
-const User = models.User || model<IUser>("User", UserSchema);
+const User = mongoose.models.User || model<IUser>("User", UserSchema);
 
 export default User;

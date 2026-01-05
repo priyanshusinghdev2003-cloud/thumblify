@@ -4,6 +4,7 @@ import cors from "cors";
 import { connectToDB } from "./db/index.ts";
 import session from "express-session";
 import MongoStore from "connect-mongo";
+import authRoute from "./routes/authRoute.ts";
 
 declare module "express-session" {
   interface SessionData {
@@ -45,6 +46,7 @@ app.use(
   })
 );
 app.use(express.json());
+app.use("/api/auth", authRoute);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("server is Live!");
