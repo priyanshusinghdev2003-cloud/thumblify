@@ -5,6 +5,8 @@ import { connectToDB } from "./db/index.ts";
 import session from "express-session";
 import MongoStore from "connect-mongo";
 import authRoute from "./routes/authRoute.ts";
+import thumbnailRoute from "./routes/thumbnailRoute.ts";
+import userThubnailRoute from "./routes/UserThubnailRoute.ts";
 
 declare module "express-session" {
   interface SessionData {
@@ -47,6 +49,8 @@ app.use(
 );
 app.use(express.json());
 app.use("/api/auth", authRoute);
+app.use("/api/thumbnail", thumbnailRoute);
+app.use("/api/user/thumbnails", userThubnailRoute);
 
 app.get("/", (req: Request, res: Response) => {
   res.send("server is Live!");

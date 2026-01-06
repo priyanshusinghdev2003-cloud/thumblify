@@ -155,3 +155,30 @@ export const generateThumbnail = async (req: Request, res: Response) => {
       .json({ message: error.message || "Internal Server Error" });
   }
 };
+
+export const deleteThumbnail = async (req: Request, res: Response) => {
+  try {
+    const { thumbnailId } = req.params;
+    const { userId } = req.session;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const thumbnail = await Thumbnail.findById();
+    if (!thumbnail) {
+      return res.status(404).json({ message: "Thumbnail not found" });
+    }
+    const result = await cloudinary.uploader.destroy(thumbnail.image_url);
+    if (result) {
+      await thumbnail.remove();
+      return res
+        .status(200)
+        .json({ message: "Thumbnail deleted successfully" });
+    }
+    return res.status(500).json({ message: "Failed to delete thumbnail" });
+  } catch (error: any) {
+    console.log(error);
+    return res
+      .status(500)
+      .json({ message: error.message || "Internal Server Error" });
+  }
+};

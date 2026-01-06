@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import SoftBackdrop from "./SoftBackdrop";
+import { useAuth } from "../context/authContext";
 
 const Login = () => {
   const [state, setState] = useState("login");
+  const { login, signUp } = useAuth();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -17,6 +19,11 @@ const Login = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (state === "login") {
+      login(formData);
+    } else {
+      signUp(formData);
+    }
   };
 
   return (
