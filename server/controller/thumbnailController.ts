@@ -56,14 +56,15 @@ export const generateThumbnail = async (req: Request, res: Response) => {
       text_overlay,
       prompt: user_prompt,
     } = req.body;
+
     const thumbnail = await Thumbnail.create({
       title,
       style,
       aspectRatio,
       color_schema,
       text_overlay,
-      prompt_used: user_prompt,
-      user_prompt,
+      prompt_used: user_prompt || "",
+      user_prompt: user_prompt || "",
       userId,
       isGenerating: true,
     });
@@ -163,17 +164,28 @@ export const deleteThumbnail = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const thumbnail = await Thumbnail.findById();
+    const thumbnail = await Thumbnail.findById({ _id: thumbnailId });
     if (!thumbnail) {
       return res.status(404).json({ message: "Thumbnail not found" });
     }
-    const result = await cloudinary.uploader.destroy(thumbnail.image_url);
-    if (result) {
-      await thumbnail.remove();
+    if (thumbnail?.image_url) {
+      const result = await cloudinary.uploader.destroy(thumbnail.image_url);
+      if (result) {
+        await thumbnail.remove();
+        const updatedThumbnails = await Thumbnail.find({ userId });
+        return res.status(200).json({
+          message: "Thumbnail deleted successfully",
+          updatedThumbnails,
+        });
+      }
+    } else {
+      await thumbnail.deleteOne();
+      const updatedThumbnails = await Thumbnail.find({ userId });
       return res
         .status(200)
-        .json({ message: "Thumbnail deleted successfully" });
+        .json({ message: "Thumbnail deleted successfully", updatedThumbnails });
     }
+
     return res.status(500).json({ message: "Failed to delete thumbnail" });
   } catch (error: any) {
     console.log(error);

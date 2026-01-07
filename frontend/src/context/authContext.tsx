@@ -98,9 +98,21 @@ export const AuthContextProvider = ({
         setUser(data.user as IUser);
         setIsLoggedIn(true);
       }
-      toast.success(data.message);
+      toast.success(data.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
     } catch (error: any) {
-      toast.error(error?.response?.data?.message);
+      toast.error(error?.response?.data?.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
     }
   };
   useEffect(() => {

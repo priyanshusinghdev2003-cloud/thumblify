@@ -7,6 +7,7 @@ import MongoStore from "connect-mongo";
 import authRoute from "./routes/authRoute.ts";
 import thumbnailRoute from "./routes/thumbnailRoute.ts";
 import userThubnailRoute from "./routes/UserThubnailRoute.ts";
+import rateLimit from "express-rate-limit";
 
 declare module "express-session" {
   interface SessionData {
@@ -18,10 +19,21 @@ declare module "express-session" {
 dotenv.config();
 connectToDB();
 
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 10,
+  message: {
+    message: "Too many requests, please try again later.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
 const app = express();
 const port = process.env.PORT || 3000;
 
 // middleware
+
 app.use(
   cors({
     origin: [
@@ -33,6 +45,7 @@ app.use(
     credentials: true,
   })
 );
+app.set("trust proxy", 1);
 app.use(
   session({
     secret: process.env.SESSION_SECRET as string,
@@ -40,6 +53,10 @@ app.use(
     saveUninitialized: false,
     cookie: {
       maxAge: 7 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+      path: "/",
     },
     store: MongoStore.create({
       mongoUrl: process.env.MONGODB_URI as string,
@@ -47,6 +64,7 @@ app.use(
     }),
   })
 );
+app.use(limiter);
 app.use(express.json());
 app.use("/api/auth", authRoute);
 app.use("/api/thumbnail", thumbnailRoute);

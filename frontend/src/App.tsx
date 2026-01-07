@@ -10,6 +10,7 @@ import YtPreview from "./pages/YtPreview";
 import Login from "./components/Login";
 import { useEffect } from "react";
 import { Toaster } from "react-hot-toast";
+import About from "./pages/About";
 
 export default function App() {
   const { pathname } = useLocation();
@@ -18,7 +19,7 @@ export default function App() {
   }, [pathname]);
   return (
     <>
-      <Toaster />
+      <Toaster position="bottom-right" reverseOrder={false} />
       <LenisScroll />
       <Navbar />
       <Routes>
@@ -28,6 +29,7 @@ export default function App() {
         <Route path="/my-generations" element={<MyGeneration />} />
         <Route path="/preview" element={<YtPreview />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/about" element={<About />} />
       </Routes>
       <Footer />
     </>

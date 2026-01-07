@@ -7,13 +7,13 @@ export const getUserThubnail = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const thubnails = await Thumbnail.find({ userId }).sort({ createdAt: -1 });
-    if (!thubnails) {
+    const thumbnail = await Thumbnail.find({ userId }).sort({ createdAt: -1 });
+    if (!thumbnail) {
       return res.status(404).json({
         message: "Thubnails not found or There is no Generated Thubnail",
       });
     }
-    return res.status(200).json({ thubnails });
+    return res.status(200).json({ thumbnail });
   } catch (error: any) {
     console.log(error);
     return res
@@ -29,11 +29,11 @@ export const getSingleThubnail = async (req: Request, res: Response) => {
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const thubnail = await Thumbnail.findById({ _id: id, userId });
-    if (!thubnail) {
-      return res.status(404).json({ message: "Thubnail not found" });
+    const thumbnail = await Thumbnail.findById({ _id: id, userId });
+    if (!thumbnail) {
+      return res.status(404).json({ message: "Thumbnail not found" });
     }
-    return res.status(200).json({ thubnail });
+    return res.status(200).json({ thumbnail });
   } catch (error: any) {
     console.log(error);
     return res

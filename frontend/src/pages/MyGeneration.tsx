@@ -1,9 +1,12 @@
 import { Link, useNavigate } from "react-router-dom";
-import { dummyThumbnails, type IThumbnail } from "../assets/assets";
+import { type IThumbnail } from "../assets/assets";
 import SoftBackdrop from "../components/SoftBackdrop";
 import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowUpRightIcon, Download, TrashIcon } from "lucide-react";
+import api from "../config/api";
+import { useAuth } from "../context/authContext";
+import toast from "react-hot-toast";
 
 function MyGeneration() {
   const aspectRatioClassMap: Record<string, string> = {
@@ -14,26 +17,58 @@ function MyGeneration() {
   const [thumbnails, setThumbnails] = useState<IThumbnail[]>([]);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
 
   const getThumbnails = async () => {
-    setThumbnails(dummyThumbnails as unknown as IThumbnail[]);
-    setLoading(false);
+    try {
+      const { data } = await api.get("/user/thumbnails");
+      setThumbnails(data?.thumbnail);
+      setLoading(false);
+    } catch (error) {
+      console.error("Error fetching thumbnails:", error);
+      setLoading(false);
+    }
   };
 
   const handleDownload = (image_url: string) => {
-    window.open(image_url, "_blank");
+    const link = document.createElement("a");
+    link.href = image_url.replace("/upload", "/upload/fl_attachment");
+
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
   };
 
-  const handleDelete = (id: string) => {
-    const updatedThumbnails = thumbnails.filter(
-      (thumbnail) => thumbnail._id !== id
-    );
-    setThumbnails(updatedThumbnails);
+  const handleDelete = async (id: string) => {
+    try {
+      const { data } = await api.delete(`/thumbnail/delete/${id}`);
+      toast.success(data?.message, {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
+      if (data?.updatedThumbnails) {
+        setThumbnails(data?.updatedThumbnails);
+      }
+    } catch (error) {
+      console.error("Error deleting thumbnail:", error);
+      toast.error("Failed to delete thumbnail", {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
+    }
   };
 
   useEffect(() => {
-    getThumbnails();
-  }, []);
+    if (isLoggedIn) {
+      getThumbnails();
+    }
+  }, [isLoggedIn]);
   return (
     <>
       <SoftBackdrop />

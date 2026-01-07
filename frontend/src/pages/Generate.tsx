@@ -1,8 +1,7 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import {
   colorSchemes,
-  dummyThumbnails,
   type AspectRatio,
   type IThumbnail,
   type ThumbnailStyle,
@@ -13,6 +12,9 @@ import StyleSelector from "../components/StyleSelector";
 import ColorSchemeSelector from "../components/ColorSchemeSelector";
 import { motion } from "framer-motion";
 import PreviewPanel from "../components/PreviewPanel";
+import { useAuth } from "../context/authContext";
+import api from "../config/api";
+import toast from "react-hot-toast";
 
 export const Generate = () => {
   const { id } = useParams();
@@ -26,27 +28,105 @@ export const Generate = () => {
   );
   const [style, setStyle] = useState<ThumbnailStyle>("Bold & Graphic");
   const [styleDropdownOpen, setStyleDropdownOpen] = useState(false);
+  const navigate = useNavigate();
+  const { isLoggedIn } = useAuth();
+  const { pathname } = useLocation();
 
-  const handleGenerate = async () => {};
+  const handleGenerate = async () => {
+    if (!isLoggedIn) {
+      return toast.error("Please login to generate thumbnail", {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
+    }
+    try {
+      if (!title.trim()) {
+        return toast.error("Please enter title", {
+          style: {
+            borderRadius: "10px",
+            background: "#363636",
+            color: "#fff",
+          },
+        });
+      }
+      setLoading(true);
+      const api_payload = {
+        title,
+        style,
+        aspectRatio,
+        text_overlay: true,
+        color_schema: colorSchemes[colorSchemeId as keyof typeof colorSchemes],
+        prompt: additionalDetails,
+      };
+      const { data } = await api.post("/thumbnail/generate", api_payload);
+      if (data?.thumbnail) {
+        navigate(`/generate/${data?.thumbnail._id}`);
+        toast.success(data?.message || "Thumbnail generated successfully", {
+          style: {
+            borderRadius: "10px",
+            background: "#363636",
+            color: "#fff",
+          },
+        });
+      }
+      setLoading(false);
+    } catch (error: any) {
+      console.error(error);
+      toast.error("Something went wrong or limit has been exceeded", {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
+      setLoading(false);
+    }
+  };
+
   const fetchThumbnail = async () => {
-    if (id) {
-      const thumbnail: any = dummyThumbnails.find(
-        (thumbnail: any) => thumbnail._id === id
-      );
-      setThumbnail(thumbnail);
-      setAdditionalDetails(thumbnail.user_prompt);
-      setTitle(thumbnail.title);
-      setColorSchemeId(thumbnail.color_scheme);
-      setAspectRatio(thumbnail.aspect_ratio);
-      setStyle(thumbnail.style);
+    try {
+      if (id) {
+        const { data }: any = await api.get(`/user/thumbnails/${id}`);
+        setThumbnail(data?.thumbnail);
+        setAdditionalDetails(data?.thumbnail?.user_prompt);
+        setTitle(data?.thumbnail?.title);
+        setColorSchemeId(data?.thumbnail?.color_schema);
+        setAspectRatio(data?.thumbnail?.aspectRatio);
+        setStyle(data?.thumbnail?.style);
+        setLoading(!data?.thumbnail.image_url);
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Something went wrong or limit has been exceeded", {
+        style: {
+          borderRadius: "10px",
+          background: "#363636",
+          color: "#fff",
+        },
+      });
       setLoading(false);
     }
   };
   useEffect(() => {
-    if (id) {
+    if (isLoggedIn && id) {
       fetchThumbnail();
     }
-  }, [id]);
+    if (id && loading && isLoggedIn) {
+      const interval = setInterval(() => {
+        fetchThumbnail();
+      }, 5000);
+      return () => clearInterval(interval);
+    }
+  }, [id, loading, isLoggedIn]);
+
+  useEffect(() => {
+    if (!id && thumbnail) {
+      setThumbnail(null);
+    }
+  }, [pathname]);
 
   return (
     <>

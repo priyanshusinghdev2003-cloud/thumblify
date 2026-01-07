@@ -9,6 +9,6 @@ import {
 const router = express.Router();
 
 router.route("/generate").post(protect, generateThumbnail);
-router.route("/delete/:id").delete(protect, deleteThumbnail);
+router.route("/delete/:thumbnailId").delete(protect, deleteThumbnail);
 
 export default router;

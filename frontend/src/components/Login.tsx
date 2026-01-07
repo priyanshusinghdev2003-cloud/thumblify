@@ -1,10 +1,12 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import SoftBackdrop from "./SoftBackdrop";
 import { useAuth } from "../context/authContext";
+import { useNavigate } from "react-router-dom";
 
 const Login = () => {
   const [state, setState] = useState("login");
-  const { login, signUp } = useAuth();
+  const { login, signUp, isLoggedIn } = useAuth();
+  const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -25,6 +27,12 @@ const Login = () => {
       signUp(formData);
     }
   };
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate("/");
+    }
+  }, [isLoggedIn]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
@@ -63,7 +71,7 @@ const Login = () => {
               type="text"
               name="name"
               placeholder="Name"
-              className="w-full bg-transparent text-white placeholder-white/60 border-none outline-none "
+              className="w-full  text-white placeholder-white/60 border-none outline-none bg-transparent "
               value={formData.name}
               onChange={handleChange}
               required

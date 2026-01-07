@@ -90,7 +90,6 @@ const thumbnailSchema = new mongoose.Schema(
     },
     user_prompt: {
       type: String,
-      required: true,
     },
     isGenerating: {
       type: Boolean,
